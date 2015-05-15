@@ -9,8 +9,11 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -40,6 +43,8 @@ public class OneToMany extends Configured implements Tool{
     job.setMapOutputKeyClass(SecondarySortContainer.class);
     job.setMapOutputValueClass(SecondarySortContainer.class);
     job.setReducerClass(JoinReducer.class);
+    job.setGroupingComparatorClass(JoinGroupComparator.class);
+    job.setPartitionerClass(JoinPartitioner.class);
     job.setNumReduceTasks(10);
     
     FileOutputFormat.setOutputPath(job, new Path(args[2]));
@@ -98,6 +103,24 @@ public class OneToMany extends Configured implements Tool{
        * left join can be either: 0, 1, 1, 1, or 1, 1, 1, 1
        * many-to-many, or even cross-join can have multiple 0s and 1s: 0, 0, 0, 1, 1, 1, all 0s, or all 1s
        */
+    }
+  }
+  
+  public static class JoinPartitioner extends Partitioner<SecondarySortContainer<Text>, SecondarySortContainer<Text>> {
+    @Override
+    public int getPartition(SecondarySortContainer<Text> key,
+        SecondarySortContainer<Text> value, int numPartitions) {
+      return (Integer.MAX_VALUE & key.getValue().hashCode()) % numPartitions;
+    }
+  }
+  
+  public static class JoinGroupComparator extends WritableComparator {
+    public JoinGroupComparator() {
+      super(SecondarySortContainer.class);
+    }
+    @Override
+    public int compare(WritableComparable a, WritableComparable b) {
+      return a.compareTo(b);
     }
   }
 }
