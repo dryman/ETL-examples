@@ -1,0 +1,33 @@
+# Hadoop ETL examples
+
+Basic ETL procedures in hadoop map-reduce API.
+
+## BUILD
+
+```
+mvn package
+```
+
+## USAGE
+
+```bash
+scp target/ETL-examples-0.0.1-SNAPSHOT-jar-with-dependencies.jar <your-hadoop-host>
+ssh <your-hadoop-host>
+
+hadoop jar ETL-examples-0.0.1-SNAPSHOT-jar-with-dependencies.jar \
+org.idryman.aggregation.BasicAggregation \
+-Dbasic-agg.start="$(date -d 'yesterday 13:00' '+%s')000" \
+-Dbasic-agg.end="$(date -d '00:00' '+%s')000" \
+<input> <output>
+
+hadoop jar ETL-examples-0.0.1-SNAPSHOT-jar-with-dependencies.jar \
+org.idryman.aggregation.OneToMany <dim_input> <fact_input> <output>
+```
+
+## DOC
+
+TODO
+
+## LICENSE
+
+CopyRight 2015 Felix Chern ALv2
