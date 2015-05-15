@@ -1,0 +1,11 @@
+.idea
+.metadata
+.settings
+*.project
+*.classpath
+*.iml
+*~
+target
+logs
+java.hprof.*.txt
+java.hprof.txt
